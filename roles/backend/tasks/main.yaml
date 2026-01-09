@@ -4,6 +4,17 @@
 - name: enable nodejs:20
   ansible.builtin.command: dnf module enable nodejs:20 -y
 
+- name: upgrade openssl packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: latest
+  loop:
+  - openssl
+  - openssl-libs
+  - openssh
+  - openssh-server
+  - openssh-clients
+
 - name: install nodejs
   ansible.builtin.dnf: # only works for Redhat family
     name: "{{ item }}"
