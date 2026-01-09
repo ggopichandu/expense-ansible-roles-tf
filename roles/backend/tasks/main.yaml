@@ -1,7 +1,7 @@
 - name: disable default nodejs
   ansible.builtin.command: dnf module disable nodejs -y
 
-- name: enable nodejs:20
+- name: enable nodejs 20
   ansible.builtin.command: dnf module enable nodejs:20 -y
 
 - name: upgrade openssl packages
@@ -13,12 +13,12 @@
     - openssl-libs
     - openssh
     - openssh-server
-    - openssh-clients
+    - openssh-clients  
 
 - name: install nodejs
-  ansible.builtin.dnf: # only works for Redhat family
+  ansible.builtin.package:
     name: "{{ item }}"
-    state: installed
+    state: present
   loop:
   - nodejs
   - mysql
@@ -27,69 +27,45 @@
   ansible.builtin.user:
     name: expense
 
-- name: run app pre-requisties
+- name: import tasks from common role
   tags:
   - deployment
   ansible.builtin.import_role:
     name: common
     tasks_from: app-pre-req
 
+- name: install dependencies
+  tags:
+  - deployment
+  ansible.builtin.command: npm install
+  args:
+    chdir: /app
 
-# - name: create app directory
-#   ansible.builtin.file:
-#     path: /app
-#     state: directory
-
-# - name: download backend code
-#   ansible.builtin.get_url:
-#     url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
-#     dest: /tmp/backend.zip
-
-# - name: unzip backend code
-#   ansible.builtin.unarchive:
-#     src: /tmp/backend.zip # by default checks in ansible server
-#     dest: /app
-#     remote_src: yes
-
-# - name: install npm dependencies
-#   tags:
-#   - deployment
-#   ansible.builtin.command: npm install
-#   args:
-#     chdir: /app
-
-- name: copy backend service
+- name: copy backend service #copy only works for files without variables
   ansible.builtin.template:
     src: backend.service.j2
     dest: /etc/systemd/system/backend.service
 
-- name: install python mysql dependencies
-  ansible.builtin.pip: 
+- name: ansible to install pymysql
+  ansible.builtin.pip:
     name:
-    - PyMySQL # to connect MySQL DB from Ansible
+    - PyMySQL
     - cryptography
-    executable: pip3.9 # pip3.11 if python version is 3.11
+    executable: pip3.9
 
-- name: import data into mysql
+- name: import mysql data
   community.mysql.mysql_db:
-    login_user: "{{ login_user }}"
-    login_password: "{{ login_password }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
     login_host: "{{ login_host }}"
     target: /app/schema/backend.sql
-    state: import
     name: all
-  notify:
-  - daemon reload
-  
+    state: import
 
-# - name: daemon reload
-#   ansible.builtin.systemd_service:
-#     daemon_reload: true
-
-- name: start and enable backend service
+- name: daemon reload
   tags:
   - deployment
-  ansible.builtin.service:
-    name: backend
+  ansible.builtin.systemd_service:
+    daemon_reload: true
     state: restarted
-    enabled: yes
+    name: backend
