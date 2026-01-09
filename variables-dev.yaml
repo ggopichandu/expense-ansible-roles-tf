@@ -1,6 +1,6 @@
 login_user: root
-login_host: 10.0.2.123 
-login_password: ExpenseApp11
+login_host: db-dev.gopichand.online
+login_password: ExpenseApp1
 DB_HOST: db-dev.gopichand.online
 BACKEND_API_URL: backend.app-dev.gopichand.online
 nexus_url: nexus.gopichand.online:8081
