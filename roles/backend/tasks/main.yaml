@@ -16,9 +16,9 @@
     - openssh-clients  
 
 - name: install nodejs
-  ansible.builtin.package:
+  ansible.builtin.dnf: #only works for Redhat family
     name: "{{ item }}"
-    state: present
+    state: installed
   loop:
   - nodejs
   - mysql
