@@ -1,7 +1,7 @@
 - name: create ec2 and r53 records
   hosts: localhost
   vars:
-    zone: gopichand.online
+    zone: lakshith.online
     instances:
     - db
     - backend
