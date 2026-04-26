@@ -34,12 +34,12 @@
     name: common
     tasks_from: app-pre-req
 
-# - name: install dependencies
-#   tags:
-#   - deployment
-#   ansible.builtin.command: npm install
-#   args:
-#     chdir: /app
+- name: install dependencies
+  tags:
+  - deployment
+  ansible.builtin.command: npm install
+  args:
+    chdir: /app
 
 - name: copy backend service #copy only works for files without variables
   ansible.builtin.template:
